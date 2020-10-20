@@ -4,24 +4,36 @@
 import React from 'react'
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import {build, fake} from '@jackfranklin/test-data-bot'
 import Login from '../../components/login'
 
+const buildLoginForm = build({
+  fields: {
+    username: fake(faker => faker.internet.userName()),
+    password: fake(faker => faker.internet.password()),
+  },
+})
+
 test('submitting the form calls onSubmit with username and password', () => {
-  // 🐨 create a variable called "submittedData" and a handleSubmit function that
-  // accepts the data and assigns submittedData to the data that was submitted
-  // 💰 if you need a hand, here's what the handleSubmit function should do:
-  // const handleSubmit = data => (submittedData = data)
-  //
-  // 🐨 render the login with your handleSubmit function as the onSubmit prop
-  //
-  // 🐨 get the username and password fields via `getByLabelText`
-  // 🐨 use userEvent.type to change the username and password fields to
-  //    whatever you want
-  //
-  // 🐨 click on the button with the text "Submit"
-  //
-  // assert that submittedData is correct
-  // 💰 use `toEqual` from Jest: 📜 https://jestjs.io/docs/en/expect#toequalvalue
+  const handleSubmit = jest.fn()
+  render(<Login onSubmit={handleSubmit} />)
+
+  const {username, password} = buildLoginForm()
+
+  const usernameField = screen.getByLabelText(/username/i)
+  userEvent.type(usernameField, username)
+
+  const passwordField = screen.getByLabelText(/password/i)
+  userEvent.type(passwordField, password)
+
+  const submitButton = screen.getByRole('button', {name: /submit/i})
+  userEvent.click(submitButton)
+
+  expect(handleSubmit).toHaveBeenCalledWith({
+    username,
+    password,
+  })
+  expect(handleSubmit).toHaveBeenCalledTimes(1)
 })
 
 /*
